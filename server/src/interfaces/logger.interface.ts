@@ -1,11 +1,11 @@
-import { LogLevel } from 'src/config';
+import { LogLevel } from 'src/enum';
 
 export const ILoggerRepository = 'ILoggerRepository';
 
 export interface ILoggerRepository {
   setAppName(name: string): void;
   setContext(message: string): void;
-  setLogLevel(level: LogLevel): void;
+  setLogLevel(level: LogLevel | false): void;
 
   verbose(message: any, ...args: any): void;
   debug(message: any, ...args: any): void;

@@ -16,6 +16,7 @@ import { SystemConfigFFmpegDto } from 'src/dtos/system-config.dto';
 import { AssetEntity } from 'src/entities/asset.entity';
 import { AssetPathType } from 'src/entities/move.entity';
 import { AssetFileType, AssetType } from 'src/enum';
+import { envData } from 'src/env';
 import { IAssetRepository, WithoutProperty } from 'src/interfaces/asset.interface';
 import { ICryptoRepository } from 'src/interfaces/crypto.interface';
 import {
@@ -224,7 +225,7 @@ export class MediaService {
             size,
             colorspace,
             quality: image.quality,
-            processInvalidImages: process.env.IMMICH_PROCESS_INVALID_IMAGES === 'true',
+            processInvalidImages: envData.processInvalidImages,
           };
 
           const outputPath = useExtracted ? extractedPath : asset.originalPath;

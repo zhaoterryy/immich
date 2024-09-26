@@ -11,8 +11,9 @@ import _ from 'lodash';
 import { writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { SystemConfig } from 'src/config';
-import { CLIP_MODEL_INFO, isDev, serverVersion } from 'src/constants';
+import { CLIP_MODEL_INFO, serverVersion } from 'src/constants';
 import { ImmichCookie, ImmichHeader } from 'src/dtos/auth.dto';
+import { envData, ImmichEnv } from 'src/env';
 import { ILoggerRepository } from 'src/interfaces/logger.interface';
 import { Metadata } from 'src/middleware/auth.guard';
 
@@ -230,7 +231,7 @@ export const useSwagger = (app: INestApplication, force = false) => {
 
   SwaggerModule.setup('doc', app, specification, customOptions);
 
-  if (isDev() || force) {
+  if (envData.environment === ImmichEnv.DEVELOPMENT || force) {
     // Generate API Documentation only in development mode
     const outputPath = path.resolve(process.cwd(), '../open-api/immich-openapi-specs.json');
     writeFileSync(outputPath, JSON.stringify(patchOpenAPI(specification), null, 2), { encoding: 'utf8' });

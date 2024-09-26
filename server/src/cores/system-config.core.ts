@@ -8,6 +8,7 @@ import { Subject } from 'rxjs';
 import { SystemConfig, defaults } from 'src/config';
 import { SystemConfigDto } from 'src/dtos/system-config.dto';
 import { SystemMetadataKey } from 'src/enum';
+import { envData } from 'src/env';
 import { DatabaseLock } from 'src/interfaces/database.interface';
 import { ILoggerRepository } from 'src/interfaces/logger.interface';
 import { ISystemMetadataRepository } from 'src/interfaces/system-metadata.interface';
@@ -85,13 +86,13 @@ export class SystemConfigCore {
   }
 
   isUsingConfigFile() {
-    return !!process.env.IMMICH_CONFIG_FILE;
+    return !!envData.configFile;
   }
 
   private async buildConfig() {
     // load partial
     const partial = this.isUsingConfigFile()
-      ? await this.loadFromFile(process.env.IMMICH_CONFIG_FILE as string)
+      ? await this.loadFromFile(envData.configFile as string)
       : await this.repository.get(SystemMetadataKey.SYSTEM_CONFIG);
 
     // merge with defaults

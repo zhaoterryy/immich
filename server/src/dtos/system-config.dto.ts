@@ -23,7 +23,6 @@ import {
   CQMode,
   Colorspace,
   ImageFormat,
-  LogLevel,
   SystemConfig,
   ToneMapping,
   TranscodeHWAccel,
@@ -32,6 +31,7 @@ import {
   VideoContainer,
 } from 'src/config';
 import { CLIPConfig, DuplicateDetectionConfig, FacialRecognitionConfig } from 'src/dtos/model-config.dto';
+import { LogLevel } from 'src/enum';
 import { ConcurrentQueueName, QueueName } from 'src/interfaces/job.interface';
 import { ValidateBoolean, validateCronExpression } from 'src/validation';
 

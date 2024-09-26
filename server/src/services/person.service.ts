@@ -26,6 +26,7 @@ import { AssetEntity } from 'src/entities/asset.entity';
 import { PersonPathType } from 'src/entities/move.entity';
 import { PersonEntity } from 'src/entities/person.entity';
 import { AssetType, Permission, SourceType, SystemMetadataKey } from 'src/enum';
+import { envData } from 'src/env';
 import { IAccessRepository } from 'src/interfaces/access.interface';
 import { IAssetRepository, WithoutProperty } from 'src/interfaces/asset.interface';
 import { ICryptoRepository } from 'src/interfaces/crypto.interface';
@@ -570,7 +571,7 @@ export class PersonService {
       colorspace: image.colorspace,
       quality: image.quality,
       crop: this.getCrop({ old: { width: oldWidth, height: oldHeight }, new: { width, height } }, { x1, y1, x2, y2 }),
-      processInvalidImages: process.env.IMMICH_PROCESS_INVALID_IMAGES === 'true',
+      processInvalidImages: envData.processInvalidImages,
     } as const;
 
     await this.mediaRepository.generateThumbnail(inputPath, thumbnailPath, thumbnailOptions);

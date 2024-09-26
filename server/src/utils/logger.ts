@@ -1,10 +1,11 @@
 import { HttpException } from '@nestjs/common';
+import { envData } from 'src/env';
 import { ILoggerRepository } from 'src/interfaces/logger.interface';
 import { TypeORMError } from 'typeorm';
 
 type ColorTextFn = (text: string) => string;
 
-const isColorAllowed = () => !process.env.NO_COLOR;
+const isColorAllowed = () => !envData.noColor;
 const colorIfAllowed = (colorFn: ColorTextFn) => (text: string) => (isColorAllowed() ? colorFn(text) : text);
 
 export const LogColor = {

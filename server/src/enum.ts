@@ -31,6 +31,15 @@ export enum EntityType {
   ALBUM = 'ALBUM',
 }
 
+export enum LogLevel {
+  VERBOSE = 'verbose',
+  DEBUG = 'debug',
+  LOG = 'log',
+  WARN = 'warn',
+  ERROR = 'error',
+  FATAL = 'fatal',
+}
+
 export enum MemoryType {
   /** pictures taken on this day X years ago */
   ON_THIS_DAY = 'on_this_day',

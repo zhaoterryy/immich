@@ -1,6 +1,5 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Inject, Module, OnModuleDestroy, OnModuleInit, ValidationPipe } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE, ModuleRef } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule, SchedulerRegistry } from '@nestjs/schedule';
@@ -9,7 +8,7 @@ import _ from 'lodash';
 import { ClsModule } from 'nestjs-cls';
 import { OpenTelemetryModule } from 'nestjs-otel';
 import { commands } from 'src/commands';
-import { bullConfig, bullQueues, clsConfig, immichAppConfig } from 'src/config';
+import { bullConfig, bullQueues, clsConfig } from 'src/config';
 import { controllers } from 'src/controllers';
 import { databaseConfig } from 'src/database.config';
 import { entities } from 'src/entities';
@@ -41,7 +40,6 @@ const imports = [
   BullModule.forRoot(bullConfig),
   BullModule.registerQueue(...bullQueues),
   ClsModule.forRoot(clsConfig),
-  ConfigModule.forRoot(immichAppConfig),
   EventEmitterModule.forRoot(),
   OpenTelemetryModule.forRoot(otelConfig),
   TypeOrmModule.forRootAsync({
@@ -117,7 +115,6 @@ export class ImmichAdminModule {}
 
 @Module({
   imports: [
-    ConfigModule.forRoot(immichAppConfig),
     EventEmitterModule.forRoot(),
     TypeOrmModule.forRoot(databaseConfig),
     TypeOrmModule.forFeature(entities),

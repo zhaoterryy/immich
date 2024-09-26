@@ -1,12 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import { dirname, join, resolve } from 'node:path';
 import { ImageFormat } from 'src/config';
-import { APP_MEDIA_LOCATION } from 'src/constants';
 import { SystemConfigCore } from 'src/cores/system-config.core';
 import { AssetEntity } from 'src/entities/asset.entity';
 import { AssetPathType, PathType, PersonPathType } from 'src/entities/move.entity';
 import { PersonEntity } from 'src/entities/person.entity';
 import { AssetFileType } from 'src/enum';
+import { envData } from 'src/env';
 import { IAssetRepository } from 'src/interfaces/asset.interface';
 import { ICryptoRepository } from 'src/interfaces/crypto.interface';
 import { ILoggerRepository } from 'src/interfaces/logger.interface';
@@ -24,8 +24,8 @@ export enum StorageFolder {
   THUMBNAILS = 'thumbs',
 }
 
-export const THUMBNAIL_DIR = resolve(join(APP_MEDIA_LOCATION, StorageFolder.THUMBNAILS));
-export const ENCODED_VIDEO_DIR = resolve(join(APP_MEDIA_LOCATION, StorageFolder.ENCODED_VIDEO));
+export const THUMBNAIL_DIR = resolve(join(envData.mediaLocation, StorageFolder.THUMBNAILS));
+export const ENCODED_VIDEO_DIR = resolve(join(envData.mediaLocation, StorageFolder.ENCODED_VIDEO));
 
 export interface MoveRequest {
   entityId: string;
@@ -94,7 +94,7 @@ export class StorageCore {
   }
 
   static getBaseFolder(folder: StorageFolder) {
-    return join(APP_MEDIA_LOCATION, folder);
+    return join(envData.mediaLocation, folder);
   }
 
   static getPersonThumbnailPath(person: PersonEntity) {
@@ -119,7 +119,7 @@ export class StorageCore {
 
   static isImmichPath(path: string) {
     const resolvedPath = resolve(path);
-    const resolvedAppMediaLocation = resolve(APP_MEDIA_LOCATION);
+    const resolvedAppMediaLocation = resolve(envData.mediaLocation);
     const normalizedPath = resolvedPath.endsWith('/') ? resolvedPath : resolvedPath + '/';
     const normalizedAppMediaLocation = resolvedAppMediaLocation.endsWith('/')
       ? resolvedAppMediaLocation

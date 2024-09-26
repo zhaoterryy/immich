@@ -3,6 +3,7 @@ import { Duration } from 'luxon';
 import semver from 'semver';
 import { getVectorExtension } from 'src/database.config';
 import { OnEmit } from 'src/decorators';
+import { envData } from 'src/env';
 import {
   DatabaseExtension,
   DatabaseLock,
@@ -116,7 +117,7 @@ export class DatabaseService {
 
       await this.checkReindexing();
 
-      if (process.env.DB_SKIP_MIGRATIONS !== 'true') {
+      if (!envData.database.skipMigrations) {
         await this.databaseRepository.runMigrations();
       }
     });

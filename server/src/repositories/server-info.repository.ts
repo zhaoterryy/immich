@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises';
 import { promisify } from 'node:util';
 import sharp from 'sharp';
 import { resourcePaths } from 'src/constants';
+import { envData } from 'src/env';
 import { ILoggerRepository } from 'src/interfaces/logger.interface';
 import { GitHubRelease, IServerInfoRepository, ServerBuildVersions } from 'src/interfaces/server-info.interface';
 import { Instrumentation } from 'src/utils/instrumentation';
@@ -67,7 +68,7 @@ export class ServerInfoRepository implements IServerInfoRepository {
       .catch(() => this.logger.warn(`Failed to read ${resourcePaths.lockFile}`));
 
     return {
-      nodejs: nodejsOutput || process.env.NODE_VERSION || '',
+      nodejs: nodejsOutput || envData.nodeVersion || '',
       exiftool: await exiftool.version(),
       ffmpeg: getLockfileVersion('ffmpeg', lockfile) || ffmpegOutput.replaceAll('ffmpeg version', '') || '',
       libvips: getLockfileVersion('libvips', lockfile) || sharp.versions.vips,

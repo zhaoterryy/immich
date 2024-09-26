@@ -1,5 +1,5 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { getBuildMetadata, getServerLicensePublicKey } from 'src/config';
+import { getServerLicensePublicKey } from 'src/config';
 import { serverVersion } from 'src/constants';
 import { StorageCore, StorageFolder } from 'src/cores/storage.core';
 import { SystemConfigCore } from 'src/cores/system-config.core';
@@ -16,6 +16,7 @@ import {
   UsageByUserDto,
 } from 'src/dtos/server.dto';
 import { SystemMetadataKey } from 'src/enum';
+import { envData } from 'src/env';
 import { ICryptoRepository } from 'src/interfaces/crypto.interface';
 import { ILoggerRepository } from 'src/interfaces/logger.interface';
 import { IServerInfoRepository } from 'src/interfaces/server-info.interface';
@@ -55,7 +56,6 @@ export class ServerService {
 
   async getAboutInfo(): Promise<ServerAboutResponseDto> {
     const version = `v${serverVersion.toString()}`;
-    const buildMetadata = getBuildMetadata();
     const buildVersions = await this.serverInfoRepository.getBuildVersions();
     const licensed = await this.systemMetadataRepository.get(SystemMetadataKey.LICENSE);
 
@@ -63,7 +63,7 @@ export class ServerService {
       version,
       versionUrl: `https://github.com/immich-app/immich/releases/tag/${version}`,
       licensed: !!licensed,
-      ...buildMetadata,
+      ...envData.buildMetadata,
       ...buildVersions,
     };
   }

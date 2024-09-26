@@ -1,12 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { DateTime } from 'luxon';
 import semver, { SemVer } from 'semver';
-import { isDev, serverVersion } from 'src/constants';
+import { serverVersion } from 'src/constants';
 import { SystemConfigCore } from 'src/cores/system-config.core';
 import { OnEmit, OnServerEvent } from 'src/decorators';
 import { ReleaseNotification, ServerVersionResponseDto } from 'src/dtos/server.dto';
 import { VersionCheckMetadata } from 'src/entities/system-metadata.entity';
 import { SystemMetadataKey } from 'src/enum';
+import { envData, ImmichEnv } from 'src/env';
 import { ClientEvent, IEventRepository, ServerEvent, ServerEventMap } from 'src/interfaces/event.interface';
 import { IJobRepository, JobName, JobStatus } from 'src/interfaces/job.interface';
 import { ILoggerRepository } from 'src/interfaces/logger.interface';
@@ -54,7 +55,7 @@ export class VersionService {
     try {
       this.logger.debug('Running version check');
 
-      if (isDev()) {
+      if (envData.environment === ImmichEnv.DEVELOPMENT) {
         return JobStatus.SKIPPED;
       }
 
