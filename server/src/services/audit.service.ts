@@ -12,15 +12,7 @@ import {
   PathEntityType,
 } from 'src/dtos/audit.dto';
 import { AuthDto } from 'src/dtos/auth.dto';
-import {
-  AssetFileType,
-  AssetPathType,
-  DatabaseAction,
-  Permission,
-  PersonPathType,
-  StorageFolder,
-  UserPathType,
-} from 'src/enum';
+import { AssetFileType, AssetPathType, DatabaseAction, Permission, PersonPathType, UserPathType } from 'src/enum';
 import { JOBS_ASSET_PAGINATION_SIZE, JobStatus } from 'src/interfaces/job.interface';
 import { BaseService } from 'src/services/base.service';
 import { getAssetFiles } from 'src/utils/asset.util';
@@ -119,19 +111,16 @@ export class AuditService extends BaseService {
 
   async getFileReport() {
     const hasFile = (items: Set<string>, filename: string) => items.has(filename) || items.has(this.fullPath(filename));
-    const crawl = async (folder: StorageFolder) =>
-      new Set(
-        await this.storageRepository.crawl({
-          includeHidden: true,
-          pathsToCrawl: [StorageCore.getBaseFolder(folder)],
-        }),
-      );
+    const crawl = async (folder: string) =>
+      new Set(await this.storageRepository.crawl({ includeHidden: true, pathsToCrawl: [folder] }));
 
-    const uploadFiles = await crawl(StorageFolder.UPLOAD);
-    const libraryFiles = await crawl(StorageFolder.LIBRARY);
-    const thumbFiles = await crawl(StorageFolder.THUMBNAILS);
-    const videoFiles = await crawl(StorageFolder.ENCODED_VIDEO);
-    const profileFiles = await crawl(StorageFolder.PROFILE);
+    const { mediaPaths } = this.configRepository.getEnv();
+
+    const uploadFiles = await crawl(mediaPaths.uploads);
+    const libraryFiles = await crawl(mediaPaths.library);
+    const thumbFiles = await crawl(mediaPaths.thumbnails);
+    const videoFiles = await crawl(mediaPaths.encodedVideos);
+    const profileFiles = await crawl(mediaPaths.profile);
     const allFiles = new Set<string>();
     for (const list of [libraryFiles, thumbFiles, videoFiles, profileFiles, uploadFiles]) {
       for (const item of list) {

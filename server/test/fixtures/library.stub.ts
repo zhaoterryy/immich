@@ -83,7 +83,7 @@ export const libraryStub = {
     assets: [],
     owner: userStub.admin,
     ownerId: 'user-id',
-    importPaths: [join(THUMBNAIL_DIR, 'library'), '/xyz', join(APP_MEDIA_LOCATION, 'library')],
+    importPaths: ['upload/thumbs/library', '/xyz', 'upload/library'],
     createdAt: new Date('2023-01-01'),
     updatedAt: new Date('2023-01-01'),
     refreshedAt: null,

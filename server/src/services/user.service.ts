@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { DateTime } from 'luxon';
+import { join } from 'node:path';
 import { SALT_ROUNDS } from 'src/constants';
-import { StorageCore } from 'src/cores/storage.core';
 import { AuthDto } from 'src/dtos/auth.dto';
 import { LicenseKeyDto, LicenseResponseDto } from 'src/dtos/license.dto';
 import { UserPreferencesResponseDto, UserPreferencesUpdateDto, mapPreferences } from 'src/dtos/user-preferences.dto';
@@ -9,7 +9,7 @@ import { CreateProfileImageResponseDto } from 'src/dtos/user-profile.dto';
 import { UserAdminResponseDto, UserResponseDto, UserUpdateMeDto, mapUser, mapUserAdmin } from 'src/dtos/user.dto';
 import { UserMetadataEntity } from 'src/entities/user-metadata.entity';
 import { UserEntity } from 'src/entities/user.entity';
-import { CacheControl, StorageFolder, UserMetadataKey } from 'src/enum';
+import { CacheControl, UserMetadataKey } from 'src/enum';
 import { IEntityJob, JobName, JobStatus } from 'src/interfaces/job.interface';
 import { UserFindOptions } from 'src/interfaces/user.interface';
 import { BaseService } from 'src/services/base.service';
@@ -196,13 +196,19 @@ export class UserService extends BaseService {
 
     this.logger.log(`Deleting user: ${user.id}`);
 
+    const { mediaPaths } = this.configRepository.getEnv();
+
     const folders = [
-      StorageCore.getLibraryFolder(user),
-      StorageCore.getFolderLocation(StorageFolder.UPLOAD, user.id),
-      StorageCore.getFolderLocation(StorageFolder.PROFILE, user.id),
-      StorageCore.getFolderLocation(StorageFolder.THUMBNAILS, user.id),
-      StorageCore.getFolderLocation(StorageFolder.ENCODED_VIDEO, user.id),
+      join(mediaPaths.library, user.id),
+      join(mediaPaths.uploads, user.id),
+      join(mediaPaths.profile, user.id),
+      join(mediaPaths.thumbnails, user.id),
+      join(mediaPaths.encodedVideos, user.id),
     ];
+
+    if (user.storageLabel) {
+      folders.push(join(mediaPaths.library, user.storageLabel));
+    }
 
     for (const folder of folders) {
       this.logger.warn(`Removing user from filesystem: ${folder}`);

@@ -1,6 +1,8 @@
 import { Inject } from '@nestjs/common';
+import { join } from 'node:path';
 import { SystemConfig } from 'src/config';
 import { StorageCore } from 'src/cores/storage.core';
+import { AssetPathType } from 'src/enum';
 import { IAccessRepository } from 'src/interfaces/access.interface';
 import { IActivityRepository } from 'src/interfaces/activity.interface';
 import { IAlbumUserRepository } from 'src/interfaces/album-user.interface';
@@ -40,6 +42,11 @@ import { IVersionHistoryRepository } from 'src/interfaces/version-history.interf
 import { IViewRepository } from 'src/interfaces/view.interface';
 import { AccessRequest, checkAccess, requireAccess } from 'src/utils/access';
 import { getConfig, updateConfig } from 'src/utils/config';
+
+type PathRequest = { id: string; ownerId: string };
+type ThumbnailPathRequest = PathRequest & { image: SystemConfig['image'] };
+
+const asNestedPath = (filename: string) => join(filename.slice(0, 2), filename.slice(2, 4), filename);
 
 export class BaseService {
   protected storageCore: StorageCore;
@@ -118,5 +125,37 @@ export class BaseService {
 
   checkAccess(request: AccessRequest) {
     return checkAccess(this.accessRepository, request);
+  }
+
+  buildAssetPreviewPath({ image, id, ownerId }: ThumbnailPathRequest) {
+    const { mediaPaths } = this.configRepository.getEnv();
+    const filename = `${id}-${AssetPathType.PREVIEW}.${image.preview.format}`;
+    return join(mediaPaths.thumbnails, ownerId, asNestedPath(filename));
+  }
+
+  buildAssetThumbnailPath({ image, id, ownerId }: ThumbnailPathRequest) {
+    const { mediaPaths } = this.configRepository.getEnv();
+    const filename = `${id}-${AssetPathType.THUMBNAIL}.${image.thumbnail.format}`;
+    return join(mediaPaths.thumbnails, ownerId, asNestedPath(filename));
+  }
+
+  buildPersonThumbnailPath({ id, ownerId }: PathRequest) {
+    const { mediaPaths } = this.configRepository.getEnv();
+    return join(mediaPaths.thumbnails, ownerId, asNestedPath(`${id}.jpeg`));
+  }
+
+  buildEncodedVideoPath({ id, ownerId }: PathRequest) {
+    const { mediaPaths } = this.configRepository.getEnv();
+    return join(mediaPaths.encodedVideos, ownerId, asNestedPath(`${id}.mp4`));
+  }
+
+  buildAndroidMotionPath({ id, ownerId }: PathRequest) {
+    const { mediaPaths } = this.configRepository.getEnv();
+    return join(mediaPaths.encodedVideos, ownerId, asNestedPath(`${id}-MP.mp4`));
+  }
+
+  buildLibraryFolder({ id, storageLabel }: { id: string; storageLabel: string | null }) {
+    const { mediaPaths } = this.configRepository.getEnv();
+    return join(mediaPaths.library, storageLabel || id);
   }
 }

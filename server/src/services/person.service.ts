@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { FACE_THUMBNAIL_SIZE } from 'src/constants';
-import { StorageCore } from 'src/cores/storage.core';
 import { BulkIdErrorReason, BulkIdResponseDto } from 'src/dtos/asset-ids.response.dto';
 import { AuthDto } from 'src/dtos/auth.dto';
 import {
@@ -559,7 +558,7 @@ export class PersonService extends BaseService {
 
     const { width, height, inputPath } = await this.getInputDimensions(asset, { width: oldWidth, height: oldHeight });
 
-    const thumbnailPath = StorageCore.getPersonThumbnailPath(person);
+    const thumbnailPath = this.buildPersonThumbnailPath(person);
     this.storageCore.ensureFolders(thumbnailPath);
 
     const thumbnailOptions = {

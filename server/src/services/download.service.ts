@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { parse } from 'node:path';
-import { StorageCore } from 'src/cores/storage.core';
 import { AssetIdsDto } from 'src/dtos/asset.dto';
 import { AuthDto } from 'src/dtos/auth.dto';
 import { DownloadArchiveInfo, DownloadInfoDto, DownloadResponseDto } from 'src/dtos/download.dto';
@@ -9,6 +8,7 @@ import { Permission } from 'src/enum';
 import { ImmichReadStream } from 'src/interfaces/storage.interface';
 import { BaseService } from 'src/services/base.service';
 import { HumanReadableSize } from 'src/utils/bytes';
+import { isAndroidMotionPath } from 'src/utils/file';
 import { usePagination } from 'src/utils/pagination';
 import { getPreferences } from 'src/utils/preferences';
 
@@ -20,6 +20,7 @@ export class DownloadService extends BaseService {
     let archive: DownloadArchiveInfo = { size: 0, assetIds: [] };
 
     const preferences = getPreferences(auth.user);
+    const { mediaPaths } = this.configRepository.getEnv();
 
     const assetPagination = await this.getDownloadAssets(auth, dto);
     for await (const assets of assetPagination) {
@@ -29,7 +30,7 @@ export class DownloadService extends BaseService {
         const motionAssets = await this.assetRepository.getByIds(motionIds, { exifInfo: true });
         for (const motionAsset of motionAssets) {
           if (
-            !StorageCore.isAndroidMotionPath(motionAsset.originalPath) ||
+            !isAndroidMotionPath(mediaPaths, motionAsset.originalPath) ||
             preferences.download.includeEmbeddedVideos
           ) {
             assets.push(motionAsset);

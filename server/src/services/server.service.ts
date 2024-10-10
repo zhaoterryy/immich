@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { serverVersion } from 'src/constants';
-import { StorageCore } from 'src/cores/storage.core';
 import { OnEvent } from 'src/decorators';
 import { LicenseKeyDto, LicenseResponseDto } from 'src/dtos/license.dto';
 import {
@@ -13,7 +12,7 @@ import {
   ServerStorageResponseDto,
   UsageByUserDto,
 } from 'src/dtos/server.dto';
-import { StorageFolder, SystemMetadataKey } from 'src/enum';
+import { SystemMetadataKey } from 'src/enum';
 import { UserStatsQueryResponse } from 'src/interfaces/user.interface';
 import { BaseService } from 'src/services/base.service';
 import { asHumanReadable } from 'src/utils/bytes';
@@ -49,8 +48,8 @@ export class ServerService extends BaseService {
   }
 
   async getStorage(): Promise<ServerStorageResponseDto> {
-    const libraryBase = StorageCore.getBaseFolder(StorageFolder.LIBRARY);
-    const diskInfo = await this.storageRepository.checkDiskUsage(libraryBase);
+    const { mediaPaths } = this.configRepository.getEnv();
+    const diskInfo = await this.storageRepository.checkDiskUsage(mediaPaths.library);
 
     const usagePercentage = (((diskInfo.total - diskInfo.free) / diskInfo.total) * 100).toFixed(2);
 

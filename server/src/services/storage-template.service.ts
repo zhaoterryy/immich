@@ -12,15 +12,14 @@ import {
   supportedWeekTokens,
   supportedYearTokens,
 } from 'src/constants';
-import { StorageCore } from 'src/cores/storage.core';
 import { OnEvent } from 'src/decorators';
 import { AssetEntity } from 'src/entities/asset.entity';
-import { AssetPathType, AssetType, StorageFolder } from 'src/enum';
+import { AssetPathType, AssetType } from 'src/enum';
 import { DatabaseLock } from 'src/interfaces/database.interface';
 import { ArgOf } from 'src/interfaces/event.interface';
 import { IEntityJob, JOBS_ASSET_PAGINATION_SIZE, JobStatus } from 'src/interfaces/job.interface';
 import { BaseService } from 'src/services/base.service';
-import { getLivePhotoMotionFilename } from 'src/utils/file';
+import { getLivePhotoMotionFilename, isAndroidMotionPath } from 'src/utils/file';
 import { usePagination } from 'src/utils/pagination';
 
 export interface MoveAssetMetadata {
@@ -132,8 +131,8 @@ export class StorageTemplateService extends BaseService {
     }
 
     this.logger.debug('Cleaning up empty directories...');
-    const libraryFolder = StorageCore.getBaseFolder(StorageFolder.LIBRARY);
-    await this.storageRepository.removeEmptyDirs(libraryFolder);
+    const { mediaPaths } = this.configRepository.getEnv();
+    await this.storageRepository.removeEmptyDirs(mediaPaths.library);
 
     this.logger.log('Finished storage template migration');
 
@@ -141,7 +140,8 @@ export class StorageTemplateService extends BaseService {
   }
 
   async moveAsset(asset: AssetEntity, metadata: MoveAssetMetadata) {
-    if (asset.isExternal || StorageCore.isAndroidMotionPath(asset.originalPath)) {
+    const { mediaPaths } = this.configRepository.getEnv();
+    if (asset.isExternal || isAndroidMotionPath(mediaPaths, asset.originalPath)) {
       // External assets are not affected by storage template
       // TODO: shouldn't this only apply to external assets?
       return;
@@ -186,7 +186,7 @@ export class StorageTemplateService extends BaseService {
       const source = asset.originalPath;
       const extension = path.extname(source).split('.').pop() as string;
       const sanitized = sanitize(path.basename(filename, `.${extension}`));
-      const rootPath = StorageCore.getLibraryFolder({ id: asset.ownerId, storageLabel });
+      const rootPath = this.buildLibraryFolder({ id: asset.ownerId, storageLabel });
 
       let albumName = null;
       if (this.template.needsAlbum) {

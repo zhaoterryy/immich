@@ -4,6 +4,7 @@ import { access, constants } from 'node:fs/promises';
 import { basename, extname, isAbsolute } from 'node:path';
 import { promisify } from 'node:util';
 import { CacheControl } from 'src/enum';
+import { MediaPaths } from 'src/interfaces/config.interface';
 import { ILoggerRepository } from 'src/interfaces/logger.interface';
 import { ImmichReadStream } from 'src/interfaces/storage.interface';
 import { isConnectionAborted } from 'src/utils/misc';
@@ -19,6 +20,9 @@ export function getFilenameExtension(path: string): string {
 export function getLivePhotoMotionFilename(stillName: string, motionName: string) {
   return getFileNameWithoutExtension(stillName) + extname(motionName);
 }
+
+export const isAndroidMotionPath = (mediaPaths: MediaPaths, filePath: string) =>
+  filePath.startsWith(mediaPaths.encodedVideos);
 
 export class ImmichFileResponse {
   public readonly path!: string;

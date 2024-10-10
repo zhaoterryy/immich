@@ -153,14 +153,6 @@ export enum SharedLinkType {
   INDIVIDUAL = 'INDIVIDUAL',
 }
 
-export enum StorageFolder {
-  ENCODED_VIDEO = 'encoded-video',
-  LIBRARY = 'library',
-  UPLOAD = 'upload',
-  PROFILE = 'profile',
-  THUMBNAILS = 'thumbs',
-}
-
 export enum SystemMetadataKey {
   REVERSE_GEOCODING_STATE = 'reverse-geocoding-state',
   FACIAL_RECOGNITION_STATE = 'facial-recognition-state',

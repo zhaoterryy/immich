@@ -10,7 +10,6 @@ import {
   AudioCodec,
   Colorspace,
   LogLevel,
-  StorageFolder,
   TranscodeHWAccel,
   TranscodePolicy,
   TranscodeTarget,
@@ -97,8 +96,9 @@ export class MediaService extends BaseService {
 
     const { active, waiting } = await this.jobRepository.getJobCounts(QueueName.MIGRATION);
     if (active === 1 && waiting === 0) {
-      await this.storageCore.removeEmptyDirs(StorageFolder.THUMBNAILS);
-      await this.storageCore.removeEmptyDirs(StorageFolder.ENCODED_VIDEO);
+      const { mediaPaths } = this.configRepository.getEnv();
+      await this.storageRepository.removeEmptyDirs(mediaPaths.thumbnails);
+      await this.storageRepository.removeEmptyDirs(mediaPaths.encodedVideos);
     }
 
     for await (const assets of assetPagination) {
@@ -196,8 +196,9 @@ export class MediaService extends BaseService {
 
   private async generateImageThumbnails(asset: AssetEntity) {
     const { image } = await this.getConfig({ withCache: true });
-    const previewPath = StorageCore.getImagePath(asset, AssetPathType.PREVIEW, image.preview.format);
-    const thumbnailPath = StorageCore.getImagePath(asset, AssetPathType.THUMBNAIL, image.thumbnail.format);
+
+    const previewPath = this.buildAssetPreviewPath({ image, id: asset.id, ownerId: asset.ownerId });
+    const thumbnailPath = this.buildAssetThumbnailPath({ image, id: asset.id, ownerId: asset.ownerId });
     this.storageCore.ensureFolders(previewPath);
 
     const shouldExtract = image.extractEmbedded && mimeTypes.isRaw(asset.originalPath);
@@ -230,8 +231,8 @@ export class MediaService extends BaseService {
 
   private async generateVideoThumbnails(asset: AssetEntity) {
     const { image, ffmpeg } = await this.getConfig({ withCache: true });
-    const previewPath = StorageCore.getImagePath(asset, AssetPathType.PREVIEW, image.preview.format);
-    const thumbnailPath = StorageCore.getImagePath(asset, AssetPathType.THUMBNAIL, image.thumbnail.format);
+    const thumbnailPath = this.buildAssetThumbnailPath({ image, id: asset.id, ownerId: asset.ownerId });
+    const previewPath = this.buildAssetPreviewPath({ image, id: asset.id, ownerId: asset.ownerId });
     this.storageCore.ensureFolders(previewPath);
 
     const { audioStreams, videoStreams } = await this.mediaRepository.probe(asset.originalPath);
@@ -282,7 +283,7 @@ export class MediaService extends BaseService {
     }
 
     const input = asset.originalPath;
-    const output = StorageCore.getEncodedVideoPath(asset);
+    const output = this.buildEncodedVideoPath({ id, ownerId: asset.ownerId });
     this.storageCore.ensureFolders(output);
 
     const { videoStreams, audioStreams, format } = await this.mediaRepository.probe(input, {

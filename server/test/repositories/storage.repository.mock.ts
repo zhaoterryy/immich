@@ -39,11 +39,7 @@ export const makeMockWatcher =
     return () => Promise.resolve();
   };
 
-export const newStorageRepositoryMock = (reset = true): Mocked<IStorageRepository> => {
-  if (reset) {
-    StorageCore.reset();
-  }
-
+export const newStorageRepositoryMock = (): Mocked<IStorageRepository> => {
   return {
     createZipStream: vitest.fn(),
     createReadStream: vitest.fn(),

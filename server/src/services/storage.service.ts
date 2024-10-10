@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { join } from 'node:path';
-import { StorageCore } from 'src/cores/storage.core';
 import { OnEvent } from 'src/decorators';
-import { StorageFolder, SystemMetadataKey } from 'src/enum';
+import { SystemMetadataKey } from 'src/enum';
 import { DatabaseLock } from 'src/interfaces/database.interface';
 import { IDeleteFilesJob, JobStatus } from 'src/interfaces/job.interface';
 import { BaseService } from 'src/services/base.service';
 
 export class ImmichStartupError extends Error {}
 export const isStartUpError = (error: unknown): error is ImmichStartupError => error instanceof ImmichStartupError;
+
+type MountPaths = { folderPath: string; internalPath: string; externalPath: string };
 
 const docsMessage = `Please see https://immich.app/docs/administration/system-integrity#folder-checks for more information.`;
 
@@ -17,6 +18,14 @@ export class StorageService extends BaseService {
   @OnEvent({ name: 'app.bootstrap' })
   async onBootstrap() {
     const envData = this.configRepository.getEnv();
+    const { mediaPaths } = this.configRepository.getEnv();
+    const folders = [
+      mediaPaths.encodedVideos,
+      mediaPaths.library,
+      mediaPaths.profile,
+      mediaPaths.thumbnails,
+      mediaPaths.uploads,
+    ];
 
     await this.databaseRepository.withLock(DatabaseLock.SystemFileMounts, async () => {
       const flags = (await this.systemMetadataRepository.get(SystemMetadataKey.SYSTEM_FLAGS)) || { mountFiles: false };
@@ -26,14 +35,18 @@ export class StorageService extends BaseService {
 
       try {
         // check each folder exists and is writable
-        for (const folder of Object.values(StorageFolder)) {
+        for (const folder of folders) {
+          const internalPath = join(folder, '.immich');
+          const externalPath = `<UPLOAD_LOCATION>/${folder.split('/').pop()}/.immich`;
+          const paths = { internalPath, externalPath, folderPath: folder };
+
           if (!enabled) {
             this.logger.log(`Writing initial mount file for the ${folder} folder`);
-            await this.createMountFile(folder);
+            await this.createMountFile(paths);
           }
 
-          await this.verifyReadAccess(folder);
-          await this.verifyWriteAccess(folder);
+          await this.verifyReadAccess(paths);
+          await this.verifyWriteAccess(paths);
         }
 
         if (!flags.mountFiles) {
@@ -73,8 +86,7 @@ export class StorageService extends BaseService {
     return JobStatus.SUCCESS;
   }
 
-  private async verifyReadAccess(folder: StorageFolder) {
-    const { internalPath, externalPath } = this.getMountFilePaths(folder);
+  private async verifyReadAccess({ internalPath, externalPath }: MountPaths) {
     try {
       await this.storageRepository.readFile(internalPath);
     } catch (error) {
@@ -83,8 +95,7 @@ export class StorageService extends BaseService {
     }
   }
 
-  private async createMountFile(folder: StorageFolder) {
-    const { folderPath, internalPath, externalPath } = this.getMountFilePaths(folder);
+  private async createMountFile({ folderPath, internalPath, externalPath }: MountPaths) {
     try {
       this.storageRepository.mkdirSync(folderPath);
       await this.storageRepository.createFile(internalPath, Buffer.from(`${Date.now()}`));
@@ -98,21 +109,12 @@ export class StorageService extends BaseService {
     }
   }
 
-  private async verifyWriteAccess(folder: StorageFolder) {
-    const { internalPath, externalPath } = this.getMountFilePaths(folder);
+  private async verifyWriteAccess({ internalPath, externalPath }: MountPaths) {
     try {
       await this.storageRepository.overwriteFile(internalPath, Buffer.from(`${Date.now()}`));
     } catch (error) {
       this.logger.error(`Failed to write ${internalPath}: ${error}`);
       throw new ImmichStartupError(`Failed to write "${externalPath} - ${docsMessage}"`);
     }
-  }
-
-  private getMountFilePaths(folder: StorageFolder) {
-    const folderPath = StorageCore.getBaseFolder(folder);
-    const internalPath = join(folderPath, '.immich');
-    const externalPath = `<UPLOAD_LOCATION>/${folder}/.immich`;
-
-    return { folderPath, internalPath, externalPath };
   }
 }

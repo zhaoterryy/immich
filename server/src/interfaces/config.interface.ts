@@ -3,6 +3,14 @@ import { VectorExtension } from 'src/interfaces/database.interface';
 
 export const IConfigRepository = 'IConfigRepository';
 
+export type MediaPaths = {
+  uploads: string;
+  library: string;
+  profile: string;
+  thumbnails: string;
+  encodedVideos: string;
+};
+
 export interface EnvData {
   port: number;
   environment: ImmichEnvironment;
@@ -40,6 +48,8 @@ export interface EnvData {
     client: string;
     server: string;
   };
+
+  mediaPaths: MediaPaths;
 
   resourcePaths: {
     lockFile: string;
