@@ -1,4 +1,4 @@
-import { BadRequestException, Inject } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 import _ from 'lodash';
 import { DateTime, Duration } from 'luxon';
 import {
@@ -20,46 +20,19 @@ import { AuthDto } from 'src/dtos/auth.dto';
 import { MemoryLaneDto } from 'src/dtos/search.dto';
 import { AssetEntity } from 'src/entities/asset.entity';
 import { AssetStatus, Permission } from 'src/enum';
-import { IAccessRepository } from 'src/interfaces/access.interface';
-import { IAssetRepository } from 'src/interfaces/asset.interface';
-import { IConfigRepository } from 'src/interfaces/config.interface';
-import { IEventRepository } from 'src/interfaces/event.interface';
 import {
   IAssetDeleteJob,
-  IJobRepository,
   ISidecarWriteJob,
   JOBS_ASSET_PAGINATION_SIZE,
   JobItem,
   JobName,
   JobStatus,
 } from 'src/interfaces/job.interface';
-import { ILoggerRepository } from 'src/interfaces/logger.interface';
-import { IPartnerRepository } from 'src/interfaces/partner.interface';
-import { IStackRepository } from 'src/interfaces/stack.interface';
-import { ISystemMetadataRepository } from 'src/interfaces/system-metadata.interface';
-import { IUserRepository } from 'src/interfaces/user.interface';
 import { BaseService } from 'src/services/base.service';
-import { requireAccess } from 'src/utils/access';
 import { getAssetFiles, getMyPartnerIds, onAfterUnlink, onBeforeLink, onBeforeUnlink } from 'src/utils/asset.util';
 import { usePagination } from 'src/utils/pagination';
 
 export class AssetService extends BaseService {
-  constructor(
-    @Inject(IAccessRepository) private access: IAccessRepository,
-    @Inject(IAssetRepository) private assetRepository: IAssetRepository,
-    @Inject(IConfigRepository) configRepository: IConfigRepository,
-    @Inject(IJobRepository) private jobRepository: IJobRepository,
-    @Inject(ISystemMetadataRepository) systemMetadataRepository: ISystemMetadataRepository,
-    @Inject(IUserRepository) private userRepository: IUserRepository,
-    @Inject(IEventRepository) private eventRepository: IEventRepository,
-    @Inject(IPartnerRepository) private partnerRepository: IPartnerRepository,
-    @Inject(IStackRepository) private stackRepository: IStackRepository,
-    @Inject(ILoggerRepository) logger: ILoggerRepository,
-  ) {
-    super(configRepository, systemMetadataRepository, logger);
-    this.logger.setContext(AssetService.name);
-  }
-
   async getMemoryLane(auth: AuthDto, dto: MemoryLaneDto): Promise<MemoryLaneResponseDto[]> {
     const partnerIds = await getMyPartnerIds({
       userId: auth.user.id,
@@ -112,15 +85,15 @@ export class AssetService extends BaseService {
   }
 
   async get(auth: AuthDto, id: string): Promise<AssetResponseDto | SanitizedAssetResponseDto> {
-    await requireAccess(this.access, { auth, permission: Permission.ASSET_READ, ids: [id] });
+    await this.requireAccess({ auth, permission: Permission.ASSET_READ, ids: [id] });
 
     const asset = await this.assetRepository.getById(
       id,
       {
         exifInfo: true,
-        tags: true,
         sharedLinks: true,
         smartInfo: true,
+        tags: true,
         owner: true,
         faces: {
           person: true,
@@ -161,7 +134,7 @@ export class AssetService extends BaseService {
   }
 
   async update(auth: AuthDto, id: string, dto: UpdateAssetDto): Promise<AssetResponseDto> {
-    await requireAccess(this.access, { auth, permission: Permission.ASSET_UPDATE, ids: [id] });
+    await this.requireAccess({ auth, permission: Permission.ASSET_UPDATE, ids: [id] });
 
     const { description, dateTimeOriginal, latitude, longitude, rating, ...rest } = dto;
     const repos = { asset: this.assetRepository, event: this.eventRepository };
@@ -204,7 +177,7 @@ export class AssetService extends BaseService {
 
   async updateAll(auth: AuthDto, dto: AssetBulkUpdateDto): Promise<void> {
     const { ids, dateTimeOriginal, latitude, longitude, ...options } = dto;
-    await requireAccess(this.access, { auth, permission: Permission.ASSET_UPDATE, ids });
+    await this.requireAccess({ auth, permission: Permission.ASSET_UPDATE, ids });
 
     for (const id of ids) {
       await this.updateMetadata({ id, dateTimeOriginal, latitude, longitude });
@@ -301,7 +274,7 @@ export class AssetService extends BaseService {
   async deleteAll(auth: AuthDto, dto: AssetBulkDeleteDto): Promise<void> {
     const { ids, force } = dto;
 
-    await requireAccess(this.access, { auth, permission: Permission.ASSET_DELETE, ids });
+    await this.requireAccess({ auth, permission: Permission.ASSET_DELETE, ids });
     await this.assetRepository.updateAll(ids, {
       deletedAt: new Date(),
       status: force ? AssetStatus.DELETED : AssetStatus.TRASHED,
@@ -310,12 +283,17 @@ export class AssetService extends BaseService {
   }
 
   async run(auth: AuthDto, dto: AssetJobsDto) {
-    await requireAccess(this.access, { auth, permission: Permission.ASSET_UPDATE, ids: dto.assetIds });
+    await this.requireAccess({ auth, permission: Permission.ASSET_UPDATE, ids: dto.assetIds });
 
     const jobs: JobItem[] = [];
 
     for (const id of dto.assetIds) {
       switch (dto.name) {
+        case AssetJobName.REFRESH_FACES: {
+          jobs.push({ name: JobName.FACE_DETECTION, data: { id } });
+          break;
+        }
+
         case AssetJobName.REFRESH_METADATA: {
           jobs.push({ name: JobName.METADATA_EXTRACTION, data: { id } });
           break;
