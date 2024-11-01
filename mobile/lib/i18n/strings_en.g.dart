@@ -345,8 +345,6 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get group_no => 'No grouping';
 	String get group_owner => 'Group by owner';
 	String get group_year => 'Group by year';
-	String get haptic_feedback => 'Haptic feedback';
-	String get haptic_feedback_description => 'Enable haptic feedback';
 	String get has_quota => 'Has quota';
 	String get hi_user => 'Hi {name} ({email})';
 	String get hide_all_people => 'Hide all people';
@@ -729,7 +727,6 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get shared_link_options => 'Shared link options';
 	String get shared_links => 'Shared links';
 	String get shared_photos_and_videos_count => '{assetCount, plural, other {# shared photos & videos.}}';
-	String get shared_with_me => 'Shared with me';
 	String get shared_with_partner => 'Shared with {partner}';
 	String get sharing => 'Sharing';
 	String get sharing_enter_password => 'Please enter the password to view this page.';
@@ -922,6 +919,11 @@ class TranslationsAdminEn {
 	String get authentication_settings_disable_all => 'Are you sure you want to disable all login methods? Login will be completely disabled.';
 	String get authentication_settings_reenable => 'To re-enable, use a <link>Server Command</link>.';
 	String get background_task_job => 'Background Tasks';
+	String get backup_database => 'Backup Database';
+	String get backup_database_enable_description => 'Enable database backups';
+	String get backup_keep_last_amount => 'Amount of previous backups to keep';
+	String get backup_settings => 'Backup Settings';
+	String get backup_settings_description => 'Manage database backup settings';
 	String get check_all => 'Check All';
 	String get cleared_jobs => 'Cleared jobs for: {job}';
 	String get config_set_by_file => 'Config is currently set by a config file';
@@ -931,6 +933,9 @@ class TranslationsAdminEn {
 	String get confirm_reprocess_all_faces => 'Are you sure you want to reprocess all faces? This will also clear named people.';
 	String get confirm_user_password_reset => 'Are you sure you want to reset {user}\'s password?';
 	String get create_job => 'Create job';
+	String get cron_expression => 'Cron expression';
+	String get cron_expression_description => 'Set the scanning interval using the cron format. For more information please refer to e.g. <link>Crontab Guru</link>';
+	String get cron_expression_presets => 'Cron expression presets';
 	String get disable_login => 'Disable login';
 	String get duplicate_detection_job_description => 'Run machine learning on assets to detect similar images. Relies on Smart Search';
 	String get exclusion_pattern_description => 'Exclusion patterns lets you ignore files and folders when scanning your library. This is useful if you have folders that contain files you don\'t want to import, such as RAW files.';
@@ -968,9 +973,6 @@ class TranslationsAdminEn {
 	String get jobs_delayed => '{jobCount, plural, other {# delayed}}';
 	String get jobs_failed => '{jobCount, plural, other {# failed}}';
 	String get library_created => 'Created library: {library}';
-	String get library_cron_expression => 'Cron expression';
-	String get library_cron_expression_description => 'Set the scanning interval using the cron format. For more information please refer to e.g. <link>Crontab Guru</link>';
-	String get library_cron_expression_presets => 'Cron expression presets';
 	String get library_deleted => 'Library deleted';
 	String get library_import_path_description => 'Specify a folder to import. This folder, including subfolders, will be scanned for images and videos.';
 	String get library_scanning => 'Periodic Scanning';
@@ -1188,8 +1190,6 @@ class TranslationsAdminEn {
 	String get transcoding_threads_description => 'Higher values lead to faster encoding, but leave less room for the server to process other tasks while active. This value should not be more than the number of CPU cores. Maximizes utilization if set to 0.';
 	String get transcoding_tone_mapping => 'Tone-mapping';
 	String get transcoding_tone_mapping_description => 'Attempts to preserve the appearance of HDR videos when converted to SDR. Each algorithm makes different tradeoffs for color, detail and brightness. Hable preserves detail, Mobius preserves color, and Reinhard preserves brightness.';
-	String get transcoding_tone_mapping_npl => 'Tone-mapping NPL';
-	String get transcoding_tone_mapping_npl_description => 'Colors will be adjusted to look normal for a display of this brightness. Counter-intuitively, lower values increase the brightness of the video and vice versa since it compensates for the brightness of the display. 0 sets this value automatically.';
 	String get transcoding_transcode_policy => 'Transcode policy';
 	String get transcoding_transcode_policy_description => 'Policy for when a video should be transcoded. HDR videos will always be transcoded (except if transcoding is disabled).';
 	String get transcoding_two_pass_encoding => 'Two-pass encoding';
@@ -1421,6 +1421,11 @@ extension on Translations {
 			case 'admin.authentication_settings_disable_all': return 'Are you sure you want to disable all login methods? Login will be completely disabled.';
 			case 'admin.authentication_settings_reenable': return 'To re-enable, use a <link>Server Command</link>.';
 			case 'admin.background_task_job': return 'Background Tasks';
+			case 'admin.backup_database': return 'Backup Database';
+			case 'admin.backup_database_enable_description': return 'Enable database backups';
+			case 'admin.backup_keep_last_amount': return 'Amount of previous backups to keep';
+			case 'admin.backup_settings': return 'Backup Settings';
+			case 'admin.backup_settings_description': return 'Manage database backup settings';
 			case 'admin.check_all': return 'Check All';
 			case 'admin.cleared_jobs': return 'Cleared jobs for: {job}';
 			case 'admin.config_set_by_file': return 'Config is currently set by a config file';
@@ -1430,6 +1435,9 @@ extension on Translations {
 			case 'admin.confirm_reprocess_all_faces': return 'Are you sure you want to reprocess all faces? This will also clear named people.';
 			case 'admin.confirm_user_password_reset': return 'Are you sure you want to reset {user}\'s password?';
 			case 'admin.create_job': return 'Create job';
+			case 'admin.cron_expression': return 'Cron expression';
+			case 'admin.cron_expression_description': return 'Set the scanning interval using the cron format. For more information please refer to e.g. <link>Crontab Guru</link>';
+			case 'admin.cron_expression_presets': return 'Cron expression presets';
 			case 'admin.disable_login': return 'Disable login';
 			case 'admin.duplicate_detection_job_description': return 'Run machine learning on assets to detect similar images. Relies on Smart Search';
 			case 'admin.exclusion_pattern_description': return 'Exclusion patterns lets you ignore files and folders when scanning your library. This is useful if you have folders that contain files you don\'t want to import, such as RAW files.';
@@ -1467,9 +1475,6 @@ extension on Translations {
 			case 'admin.jobs_delayed': return '{jobCount, plural, other {# delayed}}';
 			case 'admin.jobs_failed': return '{jobCount, plural, other {# failed}}';
 			case 'admin.library_created': return 'Created library: {library}';
-			case 'admin.library_cron_expression': return 'Cron expression';
-			case 'admin.library_cron_expression_description': return 'Set the scanning interval using the cron format. For more information please refer to e.g. <link>Crontab Guru</link>';
-			case 'admin.library_cron_expression_presets': return 'Cron expression presets';
 			case 'admin.library_deleted': return 'Library deleted';
 			case 'admin.library_import_path_description': return 'Specify a folder to import. This folder, including subfolders, will be scanned for images and videos.';
 			case 'admin.library_scanning': return 'Periodic Scanning';
@@ -1687,8 +1692,6 @@ extension on Translations {
 			case 'admin.transcoding_threads_description': return 'Higher values lead to faster encoding, but leave less room for the server to process other tasks while active. This value should not be more than the number of CPU cores. Maximizes utilization if set to 0.';
 			case 'admin.transcoding_tone_mapping': return 'Tone-mapping';
 			case 'admin.transcoding_tone_mapping_description': return 'Attempts to preserve the appearance of HDR videos when converted to SDR. Each algorithm makes different tradeoffs for color, detail and brightness. Hable preserves detail, Mobius preserves color, and Reinhard preserves brightness.';
-			case 'admin.transcoding_tone_mapping_npl': return 'Tone-mapping NPL';
-			case 'admin.transcoding_tone_mapping_npl_description': return 'Colors will be adjusted to look normal for a display of this brightness. Counter-intuitively, lower values increase the brightness of the video and vice versa since it compensates for the brightness of the display. 0 sets this value automatically.';
 			case 'admin.transcoding_transcode_policy': return 'Transcode policy';
 			case 'admin.transcoding_transcode_policy_description': return 'Policy for when a video should be transcoded. HDR videos will always be transcoded (except if transcoding is disabled).';
 			case 'admin.transcoding_two_pass_encoding': return 'Two-pass encoding';
@@ -2124,8 +2127,6 @@ extension on Translations {
 			case 'group_no': return 'No grouping';
 			case 'group_owner': return 'Group by owner';
 			case 'group_year': return 'Group by year';
-			case 'haptic_feedback': return 'Haptic feedback';
-			case 'haptic_feedback_description': return 'Enable haptic feedback';
 			case 'has_quota': return 'Has quota';
 			case 'hi_user': return 'Hi {name} ({email})';
 			case 'hide_all_people': return 'Hide all people';
@@ -2513,7 +2514,6 @@ extension on Translations {
 			case 'shared_link_options': return 'Shared link options';
 			case 'shared_links': return 'Shared links';
 			case 'shared_photos_and_videos_count': return '{assetCount, plural, other {# shared photos & videos.}}';
-			case 'shared_with_me': return 'Shared with me';
 			case 'shared_with_partner': return 'Shared with {partner}';
 			case 'sharing': return 'Sharing';
 			case 'sharing_enter_password': return 'Please enter the password to view this page.';
